@@ -1,7 +1,7 @@
 // Based on:
 // https://raw.githubusercontent.com/redhat-cop/container-pipelines/master/basic-spring-boot/Jenkinsfile
 
-library identifier: "open-shift-demo",
+//library identifier: "open-shift-demo",
 retriever: modernSCM(
   [
     $class: "GitSCMSource",
