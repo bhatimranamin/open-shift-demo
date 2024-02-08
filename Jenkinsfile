@@ -6,7 +6,9 @@ library identifier: "pipeline-library@v1.6",
 retriever: modernSCM(
   [
     $class: "GitSCMSource",
-    remote: "https://github.com/bhatimranamin/open-shift-demo.git"
+    //remote: "https://github.com/bhatimranamin/open-shift-demo.git"
+     remote: "https://github.com/redhat-cop/pipeline-library.git"
+
   ]
 )
 
@@ -28,7 +30,7 @@ pipeline {
                 // This uploads your application's source code and performs a binary build in OpenShift
                 // This is a step defined in the shared library (see the top for the URL)
                 // (Or you could invoke this step using 'oc' commands!)
-                binaryBuild(buildConfigName: 'open-shift-demo-v2', buildFromPath: ".")
+                binaryBuild(buildConfigName: appName, buildFromPath: ".")
             }
         }
 
