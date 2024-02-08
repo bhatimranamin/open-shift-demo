@@ -8,10 +8,10 @@ LABEL authors="imranbhat"
 WORKDIR /app
 
 # Copy the JAR file into the container
-COPY target/open-shift-demo-1.0.0.jar /app/open-shift-demo.jar
+COPY target/open-shift-demo-1.0.0.jar /app/app.jar
 
 # Expose the port your application will run on
 EXPOSE 8080
 
 # Command to run the application
-CMD ["java", "-jar", "/app/open-shift-demo.jar"]
+CMD ["java", "-jar", "/app/app.jar"]
