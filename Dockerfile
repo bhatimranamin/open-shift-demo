@@ -8,6 +8,7 @@ RUN mvn install
 FROM openjdk:17-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/open-shift-demo-1.0.0.jar /app/app.jar
-EXPOSE 8080
+EXPOSE 8086
 ENTRYPOINT ["sh", "-c"]
 CMD ["java -jar app.jar"]
+
