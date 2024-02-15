@@ -1,78 +1,40 @@
-pipeline
-    {
-       agent {
-            label 'maven'
+// Based on:
+// https://raw.githubusercontent.com/redhat-cop/container-pipelines/master/basic-spring-boot/Jenkinsfile
+
+
+library identifier: "pipeline-library@v1.6",
+retriever: modernSCM(
+  [
+    $class: "GitSCMSource",
+    //remote: "https://github.com/bhatimranamin/open-shift-demo.git"
+     remote: "https://github.com/redhat-cop/pipeline-library.git"
+
+  ]
+)
+
+// The name you want to give your Spring Boot application
+// Each resource related to your app will be given this name
+appName = "open-shift-demo-v2"
+
+pipeline {
+    // Use the 'maven' Jenkins agent image which is provided with OpenShift
+    agent { label "maven" }
+    stages {
+        stage("Checkout") {
+            steps {
+                checkout scm
+            }
+        }
+        stage("Docker Build") {
+            steps {
+                // This uploads your application's source code and performs a binary build in OpenShift
+                // This is a step defined in the shared library (see the top for the URL)
+                // (Or you could invoke this step using 'oc' commands!)
+                binaryBuild(buildConfigName: appName, buildFromPath: ".")
+            }
         }
 
-        stages
-        {
-          stage('Build App')
-          {
-            steps
-             {
-              git branch: 'master', url: 'https://github.com/bhatimranamin/open-shift-demo.git'
-              script {
-                  def pom = readMavenPom file: 'pom.xml'
-                  version = pom.version
-              }
-              sh "mvn install"
-            }
-          }
-          stage('Create Image Builder') {
-            when {
-              expression {
-                openshift.withCluster() {
-                  openshift.withProject() {
-                    return !openshift.selector("bc", "sample-app-jenkins-new").exists();
-                  }
-                }
-              }
-            }
-            steps {
-              script {
-                openshift.withCluster() {
-                  openshift.withProject() {
-                    openshift.newBuild("--name=sample-app-jenkins-new", "--image-stream=openjdk18-openshift:1.14-3", "--binary=true")
-                  }
-                }
-              }
-            }
-          }
-          stage('Build Image') {
-            steps {
-              sh "rm -rf ocp && mkdir -p ocp/deployments"
-              sh "pwd && ls -la target "
-              sh "cp target/openshiftjenkins-0.0.1-SNAPSHOT.jar ocp/deployments"
-
-              script {
-                openshift.withCluster() {
-                  openshift.withProject() {
-                    openshift.selector("bc", "sample-app-jenkins-new").startBuild("--from-dir=./ocp","--follow", "--wait=true")
-                  }
-                }
-              }
-            }
-          }
-          stage('deploy') {
-            when {
-              expression {
-                openshift.withCluster() {
-                  openshift.withProject() {
-                    return !openshift.selector('dc', 'sample-app-jenkins-new').exists()
-                  }
-                }
-              }
-            }
-            steps {
-              script {
-                openshift.withCluster() {
-                  openshift.withProject() {
-                    def app = openshift.newApp("sample-app-jenkins-new", "--as-deployment-config")
-                    app.narrow("svc").expose();
-                  }
-                }
-              }
-            }
-          }
-        }
+        // You could extend the pipeline by tagging the image,
+        // or deploying it to a production environment, etc......
     }
+}
